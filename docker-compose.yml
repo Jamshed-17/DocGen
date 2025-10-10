@@ -1,0 +1,35 @@
+# document-generator/docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. Сервис Бэкенда (FastAPI/Python)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: docgen_backend
+    ports:
+      - "8000:8000"  # Доступ к API по порту 8000
+    volumes:
+      - ./backend:/app  # Монтирование кода для горячей перезагрузки
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    # Наш фронтенд будет доступен на http://localhost:3000
+
+  # 2. Сервис Фронтенда (React/Node)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: docgen_frontend
+    ports:
+      - "3000:3000"  # Доступ к UI по порту 3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Чтобы не монтировать папку node_modules с хоста
+    depends_on:
+      - backend
+    environment:
+      # Важно: URL API, чтобы React знал, куда стучаться
+      - VITE_API_URL=http://localhost:8000
+    # Команда для запуска dev-сервера React
+    command: npm run dev -- --host 0.0.0.0 --port 3000

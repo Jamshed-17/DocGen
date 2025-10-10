@@ -1,0 +1,460 @@
+/* document-generator/frontend/src/App.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+/* --- Переменные Цветов (Светлая Тема) --- */
+:root {
+    --bg-main: #f4f7f9;
+    --bg-panel: #ffffff;
+    --bg-editor: #ffffff;
+    --text-primary: #1e1e1e;
+    --text-secondary: #495057;
+    --border-color: #ddd;
+    --accent-color: #5d55ff; /* Figma Purple */
+    --accent-shadow: rgba(93, 85, 255, 0.5);
+    --bg-template-editor: #f8f9fa;
+}
+
+/* --- Переменные Цветов (Темная Тема) --- */
+.dark-theme {
+    --bg-main: #1e1e1e;
+    --bg-panel: #282828;
+    --bg-editor: #333333;
+    --text-primary: #f0f0f0;
+    --text-secondary: #b0b0b0;
+    --border-color: #444;
+    --accent-color: #7a73ff; 
+    --accent-shadow: rgba(122, 115, 255, 0.4);
+    --bg-template-editor: #383838;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif; 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.app-container {
+    padding: 30px;
+    max-width: 1600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* --- Шапка и Переключение темы --- */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    color: var(--text-primary);
+    font-weight: 800;
+    margin: 0;
+}
+
+.theme-toggle {
+    background-color: var(--bg-panel);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.theme-toggle:hover {
+    background-color: #eee;
+}
+.dark-theme .theme-toggle:hover {
+    background-color: #383838;
+}
+
+
+/* --- Основная структура --- */
+.main-content {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.editor-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- Контролы Загрузки --- */
+.file-upload-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background: var(--bg-panel);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+.dark-theme .file-upload-controls {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.file-input-label {
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.file-input-label:active { transform: scale(0.98); }
+
+.file-input-label input[type="file"] { display: none; }
+
+.file-input-label.green { background-color: #00a89d; } 
+.file-input-label.green:hover { background-color: #00877f; }
+
+.file-input-label.blue { background-color: var(--accent-color); } 
+.file-input-label.blue:hover { background-color: #4a45cc; }
+
+/* --- Область Редактирования --- */
+.editor-area {
+    position: relative;
+    background-color: var(--bg-editor);
+    background-size: contain; 
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    min-width: 400px; 
+    min-height: 500px;
+    overflow: hidden; 
+}
+.dark-theme .editor-area {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Панель Настроек (Figma-Style) --- */
+.settings-panel {
+    background: var(--bg-panel);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    width: 380px;
+    text-align: left;
+    position: sticky;
+    top: 30px;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+}
+.dark-theme .settings-panel {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.selected-block-header {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.setting-label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.settings-panel input[type="text"],
+.settings-panel input[type="number"],
+.settings-panel select,
+.settings-panel textarea { /* Добавлен textarea */
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: var(--bg-panel); 
+    color: var(--text-primary);
+    resize: vertical; /* Разрешить вертикальное изменение размера для textarea */
+    min-height: 40px;
+}
+.dark-theme .settings-panel input,
+.dark-theme .settings-panel select,
+.dark-theme .settings-panel textarea {
+     background: #383838;
+}
+
+.settings-panel input:focus,
+.settings-panel select:focus,
+.settings-panel textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(93, 85, 255, 0.2);
+    outline: none;
+}
+.dark-theme .settings-panel input:focus,
+.dark-theme .settings-panel select:focus,
+.dark-theme .settings-panel textarea:focus {
+     box-shadow: 0 0 0 3px var(--accent-shadow);
+}
+
+
+/* --- Группы настроек --- */
+.two-column-group {
+    display: flex;
+    gap: 20px;
+}
+
+/* --- Кнопки управления блоками --- */
+.control-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.control-button {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.2s;
+}
+
+.control-button.add { background-color: #00a89d; }
+.control-button.add:hover { background-color: #00877f; }
+
+.control-button.delete { background-color: #dc3545; }
+.control-button.delete:hover { background-color: #c82333; }
+.control-button:disabled { background-color: #e9ecef !important; color: #6c757d; cursor: not-allowed; }
+.dark-theme .control-button:disabled { background-color: #383838 !important; color: #777; }
+
+
+/* --- Кнопка Генерации --- */
+.generate-button {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--accent-color); 
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: background-color 0.2s;
+    box-shadow: 0 4px 10px rgba(93, 85, 255, 0.3);
+}
+
+.generate-button:hover:not(:disabled) { background-color: #4a45cc; }
+
+/* --- Цветовые инпуты --- */
+.color-picker-group input[type="color"] {
+    width: 100%;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+/* --- Управление Шрифтами --- */
+.font-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.upload-font-button {
+    background-color: #6f42c1;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+.upload-font-button:hover { background-color: #553594; }
+
+
+/* --- Помощник с Ключами --- */
+.key-list-helper {
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--bg-template-editor);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+.key-helper-label {
+    display: block;
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.key-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.key-tag-helper {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.1s;
+}
+.key-tag-helper:hover {
+    opacity: 0.8;
+}
+.dark-theme .key-tag-helper {
+    background-color: #415f43;
+    color: #b7e9b9;
+}
+
+
+/* --- Условный рендеринг --- */
+.conditional-group {
+    padding: 15px;
+    background: var(--bg-template-editor);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.conditional-prefix {
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* --- Настройки Генерации --- */
+.generation-options-group {
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+.generation-options-group h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.output-mode-item {
+    padding: 10px 0;
+    border-top: 1px solid var(--border-color);
+    margin-top: 15px;
+}
+.hint-text {
+    margin: 5px 0 0 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+.output-mode-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.output-mode-label input[type="checkbox"] {
+    margin-right: 10px;
+    width: auto;
+    height: auto;
+    cursor: pointer;
+}
+
+/* --- Тост Уведомления --- */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
+    min-width: 250px;
+    animation: slideIn 0.3s ease-out, fadeOut 0.5s 4.5s forwards;
+}
+
+.toast-success { background-color: #28a745; }
+.toast-error { background-color: #dc3545; }
+.toast-info { background-color: #17a2b8; }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-20px); }
+}
+
+/* --- Спиннер Загрузки --- */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    z-index: 3000;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid var(--accent-color);
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
