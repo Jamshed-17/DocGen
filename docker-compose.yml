@@ -11,7 +11,8 @@ services:
     ports:
       - "8000:8000"  # Доступ к API по порту 8000
     volumes:
-      - ./backend:/app  # Монтирование кода для горячей перезагрузки
+      - ./backend:/app 
+      - ./backend/data/fonts:/app/data/fonts # Монтирование кода для горячей перезагрузки
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     # Наш фронтенд будет доступен на http://localhost:3000
 

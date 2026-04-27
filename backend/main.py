@@ -11,12 +11,13 @@ from PIL import Image, ImageDraw, ImageFont
 import img2pdf
 from openpyxl import load_workbook
 import textwrap 
+from fastapi.staticfiles import StaticFiles
 
 # --- Константы и Глобальное Состояние ---
 UPLOAD_DIR = "uploads"
 CURRENT_TEMPLATE_PATH = os.path.join(UPLOAD_DIR, "current_template.png")
 CURRENT_DATA_PATH = os.path.join(UPLOAD_DIR, "data.uploaded")
-GENERATION_DATA = [] 
+GENERATION_DATA = [] # Монтируем папку шрифтов, чтобы они были доступны по URL /fonts/имя_файла
 
 # Настройка шрифтов
 FONTS_DIR = "data/fonts"
@@ -25,6 +26,9 @@ AVAILABLE_FONTS = {}
 # -------------------------------------------
 
 app = FastAPI()
+# Монтируем папку шрифтов, чтобы они были доступны по URL /fonts/имя_файла
+app.mount("/fonts", StaticFiles(directory=FONTS_DIR), name="fonts")
+
 
 # --- Настройка CORS и Инициализация ---
 origins = ["http://localhost", "http://localhost:3000"]
@@ -233,8 +237,16 @@ def read_root():
 
 @app.get("/available-fonts/")
 def get_available_fonts():
-    """Возвращает список доступных шрифтов для фронтенда."""
-    return list(AVAILABLE_FONTS.keys())
+    fonts_info = []
+    if os.path.exists(FONTS_DIR):
+        for filename in os.listdir(FONTS_DIR):
+            if filename.lower().endswith(('.ttf', '.otf')):
+                # Возвращаем объект: имя для CSS и имя файла для URL
+                fonts_info.append({
+                    "name": os.path.splitext(filename)[0],
+                    "file": filename
+                })
+    return fonts_info
 
 # --- МАРШРУТЫ ЗАГРУЗКИ (без изменений) ---
 
@@ -479,37 +491,33 @@ async def generate_documents(
                 
                 
                 # 3.6. Вставка текста
-                is_multiline = '\n' in wrapped_text
-                
-                if not is_multiline:
-                    # Логика для однострочного текста (используем anchor для точного позиционирования)
+                lines = wrapped_text.split('\n')
+
+                # Рассчитываем вертикальный межстрочный интервал (примерно 1.2 от размера шрифта)
+                # Или используем textbbox для точного замера высоты одной строки
+                line_spacing = font.size * 1.2 
+
+                for j, line in enumerate(lines):
+                    # Вычисляем Y для текущей строки
+                    current_y = y_final + (j * line_spacing)
+                    
+                    # Вычисляем X в зависимости от выравнивания
+                    line_bbox = draw.textbbox((0, 0), line, font=font)
+                    line_width = line_bbox[2] - line_bbox[0]
+                    
                     if alignment == "center":
-                        x_start = x_pixel + block_width // 2
-                        anchor_val = "mt" 
+                        x_start = x_pixel + (block_width - line_width) // 2
                     elif alignment == "right":
-                        x_start = x_pixel + block_width
-                        anchor_val = "rt" 
+                        x_start = x_pixel + block_width - line_width
                     else:
                         x_start = x_pixel
-                        anchor_val = "lt" 
-                    
-                    draw.text(
-                        (x_start, y_final), 
-                        wrapped_text,
-                        fill=font_color,
-                        font=font,
-                        anchor=anchor_val,
-                    )
-                else:
-                    # Логика для многострочного текста (используем align)
-                    x_start = x_pixel 
 
+                    # Рисуем каждую строку отдельно
                     draw.text(
-                        (x_start, y_final), 
-                        wrapped_text,
+                        (x_start, current_y), 
+                        line,
                         fill=font_color,
-                        font=font,
-                        align=alignment
+                        font=font
                     )
             
             # 4. Сохранение изображения в буфер (имя файла, режим вывода)
