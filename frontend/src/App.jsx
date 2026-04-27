@@ -429,6 +429,7 @@ function App() {
         const file = event.target.files[0];
         if (!file) return;
 
+        const isPdf = file.type === 'application/pdf';
         const formData = new FormData();
         formData.append('file', file);
 
@@ -445,14 +446,22 @@ function App() {
 
             const result = await response.json();
 
-            // Масштабирование размера редактора
+            // Устанавливаем размер редактора (теперь берем из ответа бэкенда)
             setEditorSize({
                 width: result.width / SCALE_FACTOR,
                 height: result.height / SCALE_FACTOR
             });
 
-            const localUrl = URL.createObjectURL(file);
-            setTemplateURL(localUrl);
+            if (isPdf) {
+                // Если PDF — берем сконвертированную картинку с бэкенда
+                const timestamp = new Date().getTime();
+                setTemplateURL(`${apiUrl}/uploads/current_template.png?t=${timestamp}`);
+            } else {
+                // Если обычная картинка — можно оставить локальную ссылку для скорости
+                const localUrl = URL.createObjectURL(file);
+                setTemplateURL(localUrl);
+            }
+
             addToast(`Шаблон "${result.filename}" загружен.`, 'success');
 
         } catch (error) {
@@ -628,10 +637,11 @@ function App() {
                                 <div className="setting-item">
                                     <label className="setting-label">ТО вставить текст, если ключ ПУСТ:</label>
                                     <input
-                                        type="text"
-                                        value={selectedBox.ifEmptyText}
-                                        onChange={(e) => handleStyleChange('ifEmptyText', e.target.value)}
-                                        placeholder="Например: 'Участник не указал'"
+                                        type="file"
+                                        accept="image/*,.pdf"
+                                        onChange={(e) => handleFileUpload(e, 'template')}
+                                        style={{ display: 'none' }}
+                                        id="template-upload"
                                     />
                                 </div>
                             </div>
@@ -828,7 +838,7 @@ function App() {
                     <div className="file-upload-controls">
                         <label className="file-input-label green">
                             Загрузить Шаблон 🖼️
-                            <input type="file" accept="image/*" onChange={handleTemplateUpload} />
+                            <input type="file" accept="image/*,.pdf" onChange={handleTemplateUpload} />
                         </label>
 
                         <label className="file-input-label blue">

@@ -3,6 +3,6 @@ fastapi
 uvicorn[standard]
 Pillow
 python-multipart
-# --- Добавляем
-openpyxl        # Для чтения Excel (хотя бы для структуры)
-img2pdf         # Для конвертации PNG в PDF (как ты и хотел)
+pdf2image
+openpyxl        
+img2pdf      

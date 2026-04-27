@@ -1,6 +1,7 @@
 # document-generator/backend/Dockerfile
 # Базовый образ Python
 FROM python:3.11-slim
+RUN apt-get update && apt-get install -y poppler-utils
 
 # Установка переменных окружения
 ENV PYTHONUNBUFFERED 1

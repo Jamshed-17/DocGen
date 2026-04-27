@@ -12,6 +12,7 @@ import img2pdf
 from openpyxl import load_workbook
 import textwrap 
 from fastapi.staticfiles import StaticFiles
+from pdf2image import convert_from_path
 
 # --- Константы и Глобальное Состояние ---
 UPLOAD_DIR = "uploads"
@@ -28,6 +29,7 @@ AVAILABLE_FONTS = {}
 app = FastAPI()
 # Монтируем папку шрифтов, чтобы они были доступны по URL /fonts/имя_файла
 app.mount("/fonts", StaticFiles(directory=FONTS_DIR), name="fonts")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 # --- Настройка CORS и Инициализация ---
@@ -252,17 +254,30 @@ def get_available_fonts():
 
 @app.post("/upload-template/")
 async def upload_template(file: UploadFile = File(...)):
-    if not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="Файл должен быть изображением.")
-    
     try:
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
-        img = Image.open(io.BytesIO(await file.read()))
-        img.save(CURRENT_TEMPLATE_PATH)
-        width, height = img.size
-        return {"status": "success", "filename": file.filename, "width": width, "height": height}
+        file_extension = os.path.splitext(file.filename)[1].lower()
+        temp_path = os.path.join(UPLOAD_DIR, f"temp_{file.filename}")
+        
+        with open(temp_path, "wb") as buffer:
+            buffer.write(await file.read())
+
+        if file_extension == ".pdf":
+            # Конвертируем PDF в изображение с высоким DPI (300-600 для печати)
+            # 300 DPI — стандарт для качественной печати
+            images = convert_from_path(temp_path, dpi=300)
+            if images:
+                # Берем первую страницу (индекс 0)
+                images[0].save(CURRENT_TEMPLATE_PATH, "PNG")
+            os.remove(temp_path) # Удаляем временный PDF
+        else:
+            # Если это уже картинка, просто сохраняем
+            img = Image.open(temp_path)
+            img.save(CURRENT_TEMPLATE_PATH, "PNG")
+            os.remove(temp_path)
+
+        return {"message": "Шаблон успешно загружен и сконвертирован"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка сервера при обработке изображения: {e}")
+        raise HTTPException(status_code=500, detail=f"Ошибка обработки шаблона: {e}")
 
 @app.post("/upload-data/")
 async def upload_data(file: UploadFile = File(...)):
